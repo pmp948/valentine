@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Will You Be My Valentine?</title>
+
 <style>
 body {
     margin: 0;
@@ -22,14 +23,8 @@ body {
 }
 
 @keyframes floatUp {
-    from {
-        transform: translateY(100vh);
-        opacity: 1;
-    }
-    to {
-        transform: translateY(-10vh);
-        opacity: 0;
-    }
+    from { transform: translateY(100vh); opacity: 1; }
+    to { transform: translateY(-10vh); opacity: 0; }
 }
 
 .container {
@@ -38,9 +33,7 @@ body {
     width: 100%;
 }
 
-h1 {
-    font-size: 42px;
-}
+h1 { font-size: 42px; }
 
 button {
     padding: 15px 35px;
@@ -62,6 +55,8 @@ button {
     background-color: white;
     color: #ff0066;
     position: absolute;
+    left: 55%;
+    top: 60%;
 }
 
 #message {
@@ -75,7 +70,6 @@ button {
     font-size: 20px;
 }
 
-/* Canvas for fireworks */
 canvas {
     position: absolute;
     top: 0;
@@ -88,7 +82,7 @@ canvas {
 <body>
 
 <audio id="bgMusic" loop>
-    <source src="https://cdn.pixabay.com/audio/2022/10/30/audio_8a1f9b3c58.mp3" type="audio/mpeg">
+<source src="https://cdn.pixabay.com/audio/2022/10/30/audio_8a1f9b3c58.mp3" type="audio/mpeg">
 </audio>
 
 <canvas id="fireworks"></canvas>
@@ -103,7 +97,8 @@ canvas {
 </div>
 
 <script>
-// Floating Hearts Generator
+
+/* ---------- Floating Hearts ---------- */
 function createHeart() {
     const heart = document.createElement("div");
     heart.classList.add("heart");
@@ -111,24 +106,22 @@ function createHeart() {
     heart.style.left = Math.random() * window.innerWidth + "px";
     heart.style.animationDuration = (Math.random() * 3 + 3) + "s";
     document.body.appendChild(heart);
-
-    setTimeout(() => {
-        heart.remove();
-    }, 6000);
+    setTimeout(() => heart.remove(), 6000);
 }
-
 setInterval(createHeart, 300);
 
-// Moving NO button
+
+/* ---------- Moving NO Button ---------- */
 const noBtn = document.getElementById("noBtn");
 noBtn.addEventListener("mouseover", function() {
-    const x = Math.random() * (window.innerWidth - 100);
-    const y = Math.random() * (window.innerHeight - 50);
+    const x = Math.random() * (window.innerWidth - 120);
+    const y = Math.random() * (window.innerHeight - 80);
     noBtn.style.left = x + "px";
     noBtn.style.top = y + "px";
 });
 
-// Countdown Timer (Set your date here)
+
+/* ---------- Countdown ---------- */
 const countdown = document.getElementById("countdown");
 const valentineDate = new Date("February 14, 2026 00:00:00").getTime();
 
@@ -136,48 +129,86 @@ setInterval(function() {
     const now = new Date().getTime();
     const distance = valentineDate - now;
 
+    if (distance < 0) {
+        countdown.innerHTML = "It's Valentine’s Day!!! ❤️";
+        return;
+    }
+
     const days = Math.floor(distance / (1000 * 60 * 60 * 24));
     const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
-    countdown.innerHTML = "Countdown to Valentine’s: " + days + " days " + hours + " hours 💘";
+    countdown.innerHTML = "Countdown: " + days + " days " + hours + " hours 💘";
 }, 1000);
 
-// Fireworks
+
+/* ---------- REAL Fireworks Animation ---------- */
 const canvas = document.getElementById("fireworks");
 const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
 
-function firework() {
-    for (let i = 0; i < 100; i++) {
-        ctx.beginPath();
-        ctx.arc(
-            Math.random() * canvas.width,
-            Math.random() * canvas.height,
-            3,
-            0,
-            Math.PI * 2
-        );
-        ctx.fillStyle = "hsl(" + Math.random() * 360 + ",100%,50%)";
-        ctx.fill();
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
+let particles = [];
+
+function createFirework() {
+    for (let i = 0; i < 150; i++) {
+        particles.push({
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: Math.random() * 3 + 1,
+            color: `hsl(${Math.random() * 360},100%,50%)`,
+            speedX: (Math.random() - 0.5) * 10,
+            speedY: (Math.random() - 0.5) * 10,
+            life: 100
+        });
     }
 }
 
-// YES Button Action
+function animateFireworks() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach((p, index) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+
+        p.x += p.speedX;
+        p.y += p.speedY;
+        p.life--;
+
+        if (p.life <= 0) particles.splice(index, 1);
+    });
+
+    requestAnimationFrame(animateFireworks);
+}
+animateFireworks();
+
+
+/* ---------- YES Button ---------- */
 const yesBtn = document.getElementById("yesBtn");
 const message = document.getElementById("message");
 const bgMusic = document.getElementById("bgMusic");
 
 yesBtn.addEventListener("click", function() {
+
     document.querySelector("h1").style.display = "none";
     yesBtn.style.display = "none";
     noBtn.style.display = "none";
     countdown.style.display = "none";
+
     message.style.display = "block";
-    message.innerHTML = "YES detected ✅ Valentine contract successfully signed.❤️✨";
+    message.innerHTML = `
+    YES detected ✅
+     Valentine contract successfully signed.
+    `;
 
     bgMusic.play();
-    firework();
+    createFirework();
 });
 </script>
 
