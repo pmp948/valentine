@@ -5,37 +5,56 @@
 <title>Will You Be My Valentine?</title>
 <style>
 body {
-    background: linear-gradient(135deg, #ff4e50, #fc913a);
-    font-family: Arial, sans-serif;
-    text-align: center;
-    height: 100vh;
     margin: 0;
     overflow: hidden;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: linear-gradient(135deg, #ff4e50, #ff9a9e);
     color: white;
 }
 
+/* Floating Hearts */
+.heart {
+    position: absolute;
+    color: rgba(255,255,255,0.8);
+    font-size: 20px;
+    animation: floatUp linear infinite;
+}
+
+@keyframes floatUp {
+    from {
+        transform: translateY(100vh);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(-10vh);
+        opacity: 0;
+    }
+}
+
 .container {
-    position: relative;
-    top: 30%;
+    position: absolute;
+    top: 35%;
+    width: 100%;
 }
 
 h1 {
-    font-size: 40px;
+    font-size: 42px;
 }
 
 button {
-    padding: 15px 30px;
-    font-size: 20px;
+    padding: 15px 35px;
+    font-size: 22px;
+    border-radius: 40px;
     border: none;
-    border-radius: 30px;
     cursor: pointer;
-    transition: 0.3s ease;
+    transition: 0.3s;
 }
 
 #yesBtn {
     background-color: #ff0066;
     color: white;
-    font-size: 26px;
+    font-size: 28px;
     margin-right: 20px;
 }
 
@@ -46,27 +65,62 @@ button {
 }
 
 #message {
-    font-size: 30px;
-    margin-top: 30px;
     display: none;
+    font-size: 32px;
+    margin-top: 30px;
+}
+
+#countdown {
+    margin-top: 15px;
+    font-size: 20px;
+}
+
+/* Canvas for fireworks */
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
 }
 </style>
 </head>
 
 <body>
 
+<audio id="bgMusic" loop>
+    <source src="https://cdn.pixabay.com/audio/2022/10/30/audio_8a1f9b3c58.mp3" type="audio/mpeg">
+</audio>
+
+<canvas id="fireworks"></canvas>
+
 <div class="container">
     <h1>Will You Be My Valentine? ❤️</h1>
+    <div id="countdown"></div>
+    <br>
     <button id="yesBtn">YES 💖</button>
     <button id="noBtn">NO 😅</button>
     <div id="message"></div>
 </div>
 
 <script>
-const noBtn = document.getElementById("noBtn");
-const yesBtn = document.getElementById("yesBtn");
-const message = document.getElementById("message");
+// Floating Hearts Generator
+function createHeart() {
+    const heart = document.createElement("div");
+    heart.classList.add("heart");
+    heart.innerHTML = "❤️";
+    heart.style.left = Math.random() * window.innerWidth + "px";
+    heart.style.animationDuration = (Math.random() * 3 + 3) + "s";
+    document.body.appendChild(heart);
 
+    setTimeout(() => {
+        heart.remove();
+    }, 6000);
+}
+
+setInterval(createHeart, 300);
+
+// Moving NO button
+const noBtn = document.getElementById("noBtn");
 noBtn.addEventListener("mouseover", function() {
     const x = Math.random() * (window.innerWidth - 100);
     const y = Math.random() * (window.innerHeight - 50);
@@ -74,15 +128,58 @@ noBtn.addEventListener("mouseover", function() {
     noBtn.style.top = y + "px";
 });
 
+// Countdown Timer (Set your date here)
+const countdown = document.getElementById("countdown");
+const valentineDate = new Date("February 14, 2026 00:00:00").getTime();
+
+setInterval(function() {
+    const now = new Date().getTime();
+    const distance = valentineDate - now;
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+    countdown.innerHTML = "Countdown to Valentine’s: " + days + " days " + hours + " hours 💘";
+}, 1000);
+
+// Fireworks
+const canvas = document.getElementById("fireworks");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+function firework() {
+    for (let i = 0; i < 100; i++) {
+        ctx.beginPath();
+        ctx.arc(
+            Math.random() * canvas.width,
+            Math.random() * canvas.height,
+            3,
+            0,
+            Math.PI * 2
+        );
+        ctx.fillStyle = "hsl(" + Math.random() * 360 + ",100%,50%)";
+        ctx.fill();
+    }
+}
+
+// YES Button Action
+const yesBtn = document.getElementById("yesBtn");
+const message = document.getElementById("message");
+const bgMusic = document.getElementById("bgMusic");
+
 yesBtn.addEventListener("click", function() {
     document.querySelector("h1").style.display = "none";
     yesBtn.style.display = "none";
     noBtn.style.display = "none";
+    countdown.style.display = "none";
     message.style.display = "block";
-    message.innerHTML = "YAYYY ❤️ You just made me the happiest person alive! <br><br> Get ready for the best Valentine’s ever 💕✨";
+    message.innerHTML = "YES detected ✅ Valentine contract successfully signed.❤️✨";
+
+    bgMusic.play();
+    firework();
 });
 </script>
 
 </body>
 </html>
-
